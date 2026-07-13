@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etsy Sipariş & Personel Takip Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 2rem; }
+
+        #login-screen {
+            max-width: 400px; margin: 100px auto; background: var(--card-bg); padding: 2.5rem;
+            border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; color: var(--primary); }
+        .input-group { margin-bottom: 1.25rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+        .input-group input { width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; }
+        .input-group input:focus { border-color: var(--primary); outline: none; }
+        .btn { width: 100%; padding: 0.75rem; background: var(--primary); border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+
+        #main-panel { display: none; max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .header h1 { font-size: 1.75rem; font-weight: 700; }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-logout:hover { background: var(--danger); color: #fff; }
+
+        #manager-dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .card-info h3 { font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .card-info p { font-size: 2rem; font-weight: 700; }
+        .card-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .card-blue { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+        .card-green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .card-orange { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        #manager-management-section { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 2rem; display: none; }
+        .management-grid { display: grid; grid-template-columns: 2fr 2fr 2fr 1fr; gap: 1rem; align-items: flex-end; }
+
+        .controls-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; }
+        .filters { display: flex; gap: 0.75rem; align-items: center; }
+        .filter-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 0.5rem 1.25rem; border-radius: 20px; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        
+        .search-box { position: relative; width: 300px; }
+        .search-box input { width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 0.9rem; }
+        .search-box input:focus { border-color: var(--primary); outline: none; }
+        .search-box i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .staff-section { background: var(--card-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem; }
+        .staff-title { font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        .staff-list { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .staff-badge { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; background: var(--bg-color); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-dot.active { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        .status-dot.sleep { background-color: var(--text-muted); box-shadow: 0 0 5px var(--text-muted); }
+        
+        .btn-delete-staff { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; padding: 0.2rem; border-radius: 4px; transition: 0.2s; display: none; }
+        .btn-delete-staff:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(15, 23, 42, 0.6); padding: 1rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        td { padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; transition: background 0.15s; }
+        tr:hover td { background: rgba(51, 65, 85, 0.3); }
+
+        tr.row-active td { border-left: 4px solid var(--success); background: rgba(16, 185, 129, 0.02); }
+        tr.row-sleep td { border-left: 4px solid var(--primary); background: rgba(59, 130, 246, 0.02); color: var(--text-muted); }
+        tr.row-warning td { background: rgba(245, 158, 11, 0.05); }
+        tr.row-completed td { border-left: 4px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.04); opacity: 0.65; }
+
+        .badge-status { padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
+        .badge-beklemede { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-hazirlaniyor { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-duraklatildi { background: rgba(59, 130, 246, 0.15); color: var(--primary); }
+        .badge-tamamlandi { background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .admin-status-select { background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none; }
+        .admin-status-select:focus { border-color: var(--primary); }
+
+        .time-box { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; line-height: 1.3; }
+        .time-box span { display: flex; align-items: center; gap: 0.3rem; }
+        .time-box i { width: 12px; font-size: 0.75rem; }
+
+        .requirements-box { background: rgba(15, 23, 42, 0.4); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); max-width: 320px; font-size: 0.875rem; line-height: 1.4; color: #e2e8f0; }
+        
+        .btn-claim { background: var(--success); color: #fff; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-claim:hover { background: #059669; transform: translateY(-1px); }
+
+        .btn-complete { background: transparent; color: var(--success); padding: 0.4rem 0.8rem; border: 1px solid var(--success); border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.8rem; display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+        .btn-complete:hover { background: rgba(16, 185, 129, 0.15); transform: translateY(-1px); }
+        
+        .alert-icon { color: var(--danger); font-size: 1.1rem; animation: pulse 1.5s infinite; margin-right: 0.5rem; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-title"><i class="fa-solid fa-cubes-stacked"></i> ETSY PANEL GİRİŞİ</div>
+        <div class="input-group">
+            <label>Kullanıcı Adı</label>
+            <input type="text" id="username" placeholder="Kullanıcı adını girin.">
+        </div>
+        <div class="input-group">
+            <label>Şifre</label>
+            <input type="password" id="password" placeholder="Şifrenizi girin.">
+        </div>
+        <button class="btn" onclick="login()">Sisteme Giriş Yap</button>
+    </div>
+
+    <div id="main-panel">
+        <div class="header">
+            <div>
+                <h1 id="welcome-text">👋 Hoş Geldiniz</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;"> ⚡ Powered by kaan</p>
+            </div>
+            <div class="user-info">
+                <span id="user-role-badge" class="badge-status" style="background: var(--border);">Rol</span>
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
+            </div>
+        </div>
+
+        <div id="manager-dashboard">
+            <div class="card">
+                <div class="card-info">
+                    <h3>Bekleyen Siparişler</h3>
+                    <p id="dash-waiting">0</p>
+                </div>
+                <div class="card-icon card-orange"><i class="fa-solid fa-clock"></i></div>
+            </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Aktif Personel</h3>
+                    <p id="dash-active">0 / 0</p>
+                </div>
+                <div class="card-icon card-green"><i class="fa-solid fa-user-check"></i></div>
+            </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Bugün Tamamlanan</h3>
+                    <p id="dash-completed">0</p>
+                </div>
+                <div class="card-icon card-blue"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+        </div>
+
+        <div id="manager-management-section">
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-user-plus"></i> Yeni Çalışan Hesabı Tanımla -> DB</h3>
+            <div class="management-grid">
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>Çalışanın Adı</label>
+                    <input type="text" id="new-emp-name" placeholder="Örn: Mehmet">
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>Sisteme Giriş Adı (Küçük Harf)</label>
+                    <input type="text" id="new-emp-username" placeholder="Örn: mehmet">
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>Giriş Şifresi</label>
+                    <input type="password" id="new-emp-password" placeholder="sifre">
+                </div>
+                <button class="btn" onclick="addNewEmployee()" style="padding: 0.65rem;"><i class="fa-solid fa-check"></i> Ekle</button>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <div class="filters" id="shop-filters">
+                <span style="font-weight: 600; color: var(--text-muted); font-size: 0.9rem; margin-right: 0.5rem;">Mağaza Filtresi:</span>
+                <button class="filter-btn active" onclick="filterShop('Tümü')">Tüm Mağazalar</button>
+                <button class="filter-btn" onclick="filterShop('Çanta Mağazası A')">Mağaza A</button>
+                <button class="filter-btn" onclick="filterShop('Çanta Mağazası B')">Mağaza B</button>
+            </div>
+            
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="Sipariş Kodu Ara..." oninput="handleSearch()">
+            </div>
+        </div>
+
+        <div class="staff-section">
+            <div class="staff-title">Çalışanlar:</div>
+            <div class="staff-list" id="staff-status-list"></div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sipariş Kodu</th>
+                        <th>Mağaza</th>
+                        <th>Müşteri Adı</th>
+                        <th>Özelleştirme İstekleri (Etsy Notu)</th>
+                        <th>Süreç Detayı</th>
+                        <th>Sorumlu Çalışan</th>
+                        <th>Sipariş Durumu</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentUser = null;
+        let globalData = null;
+        let activeShopFilter = 'Tümü';
+        let searchQuery = '';
+        let idleTimer = null;
+        const IDLE_TIME_LIMIT = 10 * 60 * 1000;
+
+        document.addEventListener("change", function(e) {
+            if(e.target && e.target.classList.contains("admin-status-select")) {
+                const orderId = e.target.getAttribute("data-id");
+                const newStatus = e.target.value;
+                if(currentUser && currentUser.role === 'manager') {
+                    socket.emit('managerUpdateStatus', { orderId, newStatus });
+                }
+            }
+        });
+
+        function formatTurkishDate(isoString) {
+            if (!isoString) return "-";
+            const date = new Date(isoString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}.${month}.${year} - ${hours}:${minutes}`;
+        }
+
+        function calculateDurationInMinutes(startIso, endIso) {
+            if (!startIso || !endIso) return "-";
+            const start = new Date(startIso);
+            const end = new Date(endIso);
+            const diffMs = end - start;
+            const diffMins = Math.round(diffMs / 1000 / 60);
+            return diffMins < 1 ? "1 dk'dan az" : `${diffMins} dk`;
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                currentUser = data.user;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'block';
+                
+                document.getElementById('welcome-text').innerText = `👋 Hoş Geldin, ${currentUser.name}`;
+                document.getElementById('user-role-badge').innerText = currentUser.role === 'manager' ? 'Admin / Yönetici' : 'Çalışan';
+
+                if (currentUser.role !== 'manager') {
+                    document.getElementById('manager-dashboard').style.display = 'none';
+                    document.getElementById('manager-management-section').style.display = 'none';
+                } else {
+                    document.getElementById('manager-dashboard').style.display = 'grid';
+                    document.getElementById('manager-management-section').style.display = 'block';
+                }
+
+                if (currentUser.role === 'employee') {
+                    socket.emit('updateStatus', { username: currentUser.username, status: 'Aktif' });
+                    startIdleTracking();
+                }
+
+                if (globalData) renderDOM(globalData);
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function logout() {
+            if (currentUser && currentUser.role === 'employee') {
+                socket.emit('updateStatus', { username: currentUser.username, status: 'Uyku Modunda' });
+                stopIdleTracking();
+            }
+            currentUser = null;
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('main-panel').style.display = 'none';
+        }
+
+        async function addNewEmployee() {
+            const name = document.getElementById('new-emp-name').value;
+            const username = document.getElementById('new-emp-username').value;
+            const password = document.getElementById('new-emp-password').value;
+
+            if(!name || !username || !password) {
+                alert("Lütfen tüm alanları doldurun!");
+                return;
+            }
+
+            const res = await fetch('/api/add-employee', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, name })
+            });
+
+            const data = await res.json();
+            alert(data.message);
+            if(data.success) {
+                document.getElementById('new-emp-name').value = '';
+                document.getElementById('new-emp-username').value = '';
+            }
+        }
+
+        async function deleteEmployee(username, displayName) {
+            if(!confirm(`${displayName} isimli çalışanı silmek istediğinize emin misiniz? Yarım kalan tüm işleri boşa düşecektir.`)) return;
+
+            const res = await fetch('/api/delete-employee', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+
+            const data = await res.json();
+            alert(data.message);
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.trim().toUpperCase();
+            if (globalData) renderDOM(globalData);
+        }
+
+        function startIdleTracking() {
+            stopIdleTracking();
+            resetIdleTimer();
+            window.addEventListener('mousemove', resetIdleTimer);
+            window.addEventListener('keypress', resetIdleTimer);
+            window.addEventListener('touchstart', resetIdleTimer);
+        }
+
+        function stopIdleTracking() {
+            if (idleTimer) clearTimeout(idleTimer);
+            window.removeEventListener('mousemove', resetIdleTimer);
+            window.removeEventListener('keypress', resetIdleTimer);
+            window.removeEventListener('touchstart', resetIdleTimer);
+        }
+
+        function resetIdleTimer() {
+            if (globalData && globalData.employeeStatus[currentUser.username]?.status === 'Uyku Modunda') {
+                socket.emit('updateStatus', { username: currentUser.username, status: 'Aktif' });
+            }
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                socket.emit('updateStatus', { username: currentUser.username, status: 'Uyku Modunda' });
+            }, IDLE_TIME_LIMIT);
+        }
+
+        function filterShop(shopName) {
+            activeShopFilter = shopName;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (globalData) renderDOM(globalData);
+        }
+
+        function claimOrder(orderId) {
+            if (!currentUser || currentUser.role !== 'employee') return;
+            socket.emit('claimOrder', { orderId, username: currentUser.username, employeeName: currentUser.name });
+        }
+
+        function completeOrder(orderId) {
+            if (!currentUser || currentUser.role !== 'employee') return;
+            if (confirm("Bu siparişi tamamladığınızı onaylıyor musunuz?")) {
+                socket.emit('completeOrder', { orderId });
+            }
+        }
+
+        socket.on('initData', (data) => { globalData = data; if (currentUser) renderDOM(data); });
+        socket.on('dataChanged', (data) => { globalData = data; if (currentUser) renderDOM(data); });
+
+        function renderDOM(data) {
+            const waitingOrders = data.orders.filter(o => o.orderStatus === 'Beklemede').length;
+            document.getElementById('dash-waiting').innerText = waitingOrders;
+            
+            const totalStaff = Object.keys(data.employeeStatus).length;
+            const activeStaff = Object.values(data.employeeStatus).filter(s => s.status === 'Aktif').length;
+            document.getElementById('dash-active').innerText = `${activeStaff} / ${totalStaff}`;
+
+            const completedOrdersCount = data.orders.filter(o => o.orderStatus === 'Tamamlandı').length;
+            document.getElementById('dash-completed').innerText = completedOrdersCount;
+
+            const staffListContainer = document.getElementById('staff-status-list');
+            staffListContainer.innerHTML = '';
+            Object.keys(data.employeeStatus).forEach(userKey => {
+                const info = data.employeeStatus[userKey];
+                const displayName = userKey.charAt(0).toUpperCase() + userKey.slice(1);
+                const isAktif = info.status === 'Aktif';
+                
+                const badge = document.createElement('div');
+                badge.className = 'staff-badge';
+                const deleteBtnStyle = (currentUser && currentUser.role === 'manager') ? 'inline-block' : 'none';
+
+                badge.innerHTML = `
+                    <span class="status-dot ${isAktif ? 'active' : 'sleep'}"></span>
+                    <span>${displayName}</span>
+                    <button class="btn-delete-staff" style="display: ${deleteBtnStyle};" onclick="deleteEmployee('${userKey}', '${displayName}')" title="Çalışanı Sil"><i class="fa-solid fa-circle-xmark"></i></button>
+                `;
+                staffListContainer.appendChild(badge);
+            });
+
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = '';
+
+            let filteredOrders = data.orders;
+            if (activeShopFilter !== 'Tümü') {
+                filteredOrders = filteredOrders.filter(o => o.shopName === activeShopFilter);
+            }
+            if (searchQuery !== '') {
+                filteredOrders = filteredOrders.filter(o => o.orderCode.toUpperCase().includes(searchQuery));
+            }
+
+            filteredOrders.forEach(order => {
+                const tr = document.createElement('tr');
+                const staffStatus = data.employeeStatus[order.assignedEmployee]?.status;
+                
+                if (order.orderStatus === 'Hazırlanıyor' && staffStatus === 'Aktif') {
+                    tr.className = 'row-active';
+                } else if (order.orderStatus === 'Duraklatıldı' || staffStatus === 'Uyku Modunda') {
+                    tr.className = 'row-sleep';
+                } else if (order.orderStatus === 'Beklemede') {
+                    tr.className = 'row-warning';
+                } else if (order.orderStatus === 'Tamamlandı') {
+                    tr.className = 'row-completed';
+                }
+
+                 
+                let actionCell = `<span style="color: var(--text-muted); font-size: 0.85rem;">Yetki Yok</span>`; 
+                
+                if (currentUser && currentUser.role === 'manager') {
+                    actionCell = `<span style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-user-shield"></i> Yönetici Kontrolü</span>`;
+                } else if (order.orderStatus === 'Tamamlandı') {
+                    actionCell = `<span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-check-double"></i> Arşivlendi</span>`;
+                } else if (currentUser.role === 'employee') {
+                    if (order.orderStatus === 'Beklemede') {
+                        actionCell = `<button class="btn-claim" onclick="claimOrder('${order.id}')"><i class="fa-solid fa-hand-fist"></i> Siparişi Devral</button>`;
+                    } else if (order.assignedEmployee === currentUser.username) {
+                        actionCell = `
+                            <span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Sende</span>
+                            <button class="btn-complete" onclick="completeOrder('${order.id}')"><i class="fa-solid fa-square-check"></i> Tamamla</button>
+                        `;
+                    } else {
+                        actionCell = `<span style="color: var(--text-muted); font-size: 0.85rem;">Dolu İş</span>`;
+                    }
+                }
+
+                const employeeDisplay = order.assignedEmployee 
+                    ? order.assignedEmployee.charAt(0).toUpperCase() + order.assignedEmployee.slice(1) 
+                    : `<span style="color: var(--text-muted);">Atanmadı</span>`;
+
+                
+                let timeCellContent = `
+                    <div class="time-box">
+                        <span><i class="fa-solid fa-arrow-down" style="color: var(--warning);"></i> Geliş: ${formatTurkishDate(order.createdAt)}</span>
+                    </div>
+                `;
+
+                if (order.orderStatus === 'Hazırlanıyor' || order.orderStatus === 'Duraklatıldı') {
+                    timeCellContent = `
+                        <div class="time-box">
+                            <span><i class="fa-solid fa-arrow-down" style="color: var(--warning);"></i> Geliş: ${formatTurkishDate(order.createdAt)}</span>
+                            <span><i class="fa-solid fa-spinner fa-spin" style="color: var(--primary);"></i> Başlama: ${formatTurkishDate(order.claimedAt)}</span>
+                        </div>
+                    `;
+                } else if (order.orderStatus === 'Tamamlandı') {
+                    const totalProductionTime = calculateDurationInMinutes(order.claimedAt, order.completedAt);
+                    timeCellContent = `
+                        <div class="time-box">
+                            <span><i class="fa-solid fa-arrow-down" style="color: var(--text-muted);"></i> Geliş: ${formatTurkishDate(order.createdAt)}</span>
+                            <span><i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Bitiş: ${formatTurkishDate(order.completedAt)}</span>
+                            <span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-hourglass-half"></i> Üretim: ${totalProductionTime}</span>
+                        </div>
+                    `;
+                }
+
+                let statusCellContent = "";
+                if (currentUser && currentUser.role === 'manager') {
+                    statusCellContent = `
+                        <select class="admin-status-select" data-id="${order.id}">
+                            <option value="Beklemede" ${order.orderStatus === 'Beklemede' ? 'selected' : ''}>Beklemede</option>
+                            <option value="Hazırlanıyor" ${order.orderStatus === 'Hazırlanıyor' ? 'selected' : ''}>Hazırlanıyor</option>
+                            <option value="Duraklatıldı" ${order.orderStatus === 'Duraklatıldı' ? 'selected' : ''}>Duraklatıldı</option>
+                            <option value="Tamamlandı" ${order.orderStatus === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
+                        </select>
+                    `;
+                } else {
+                    statusCellContent = `<span class="badge-status badge-${order.orderStatus.toLowerCase().replace('ı','i')}">${order.orderStatus}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: ${order.orderStatus === 'Tamamlandı' ? 'var(--success)' : (order.orderCode !== '-' ? 'var(--primary)' : 'var(--text-color)')};">
+                        ${order.orderStatus === 'Beklemede' ? '<i class="fa-solid fa-circle-exclamation alert-icon"></i>' : ''}
+                        ${order.orderCode}
+                    </td>
+                    <td><i class="fa-solid fa-store" style="color: var(--text-muted); margin-right: 0.3rem;"></i> ${order.shopName}</td>
+                    <td>${order.customerName}</td>
+                    <td><div class="requirements-box">${order.requirements}</div></td>
+                    <td>${timeCellContent}</td>
+                    <td><i class="fa-solid fa-user-gear" style="color: var(--text-muted); margin-right: 0.3rem;"></i> ${employeeDisplay}</td>
+                    <td>${statusCellContent}</td>
+                    <td>${actionCell}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
