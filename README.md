@@ -7,5 +7,5 @@
 
 # KURULUM
 
-npm init -y
-npm i websocket
+⭐ npm init -y
+⭐ npm i websocket
