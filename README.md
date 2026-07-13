@@ -9,3 +9,5 @@
 
 ⭐ npm init -y
 ⭐ npm i websocket
+⭐ npm i express
+⭐ npm i axios
