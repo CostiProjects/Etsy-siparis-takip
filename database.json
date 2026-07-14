@@ -5,12 +5,6 @@
       "password": "123",
       "role": "manager",
       "name": "Admin"
-    },
-    {
-      "username": "cinar",
-      "password": "1",
-      "role": "employee",
-      "name": "Çınar"
     }
   ],
   "orders": [
@@ -19,30 +13,25 @@
       "shopName": "Çanta Mağazası A",
       "customerName": "kaan",
       "requirements": "Üzerine altın sarısı harflerle 'fast' yazılacak, askısı zincir olacak.",
-      "orderCode": "ÇNR-1331",
-      "assignedEmployee": "cinar",
-      "orderStatus": "Tamamlandı",
-      "updatedAt": "2026-07-12T16:33:47.547Z",
-      "claimedAt": "2026-07-12T16:33:18.020Z",
-      "completedAt": "2026-07-12T16:33:47.547Z"
+      "orderCode": "-",
+      "assignedEmployee": null,
+      "orderStatus": "Beklemede",
+      "updatedAt": "2026-07-14T07:32:45.307Z",
+      "claimedAt": null,
+      "completedAt": null
     },
     {
       "id": "etsy_002",
       "shopName": "Çanta Mağazası B",
       "customerName": "can",
       "requirements": "Siyah deri çanta olsun, 'SC' harfleri gümüş renk işlensin.",
-      "orderCode": "ÇNR-8182",
-      "assignedEmployee": "cinar",
-      "orderStatus": "Tamamlandı",
-      "updatedAt": "2026-07-12T16:34:02.166Z",
-      "completedAt": "2026-07-12T16:34:02.166Z",
-      "claimedAt": "2026-07-12T16:34:00.638Z"
+      "orderCode": "-",
+      "assignedEmployee": null,
+      "orderStatus": "Beklemede",
+      "updatedAt": "2026-07-14T07:32:46.339Z",
+      "completedAt": null,
+      "claimedAt": null
     }
   ],
-  "employeeStatus": {
-    "cinar": {
-      "status": "Aktif",
-      "lastActivity": "2026-07-12T16:33:04.468Z"
-    }
-  }
+  "employeeStatus": {}
 }
